@@ -265,9 +265,6 @@ const articles: Article[] = [
   },
 ];
 
-function cn(...classes: Array<string | false | null | undefined>) {
-  return classes.filter(Boolean).join(" ");
-}
 
 // ── Article Modal / Drawer ────────────────────────────────────────────────────
 
