@@ -33,6 +33,18 @@ import {
 
 const WHATSAPP_LINK = "https://wa.me/5511980003836";
 
+// Hook to detect mobile
+function useIsMobile() {
+  const [isMobile, setIsMobile] = React.useState(false);
+  React.useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check, { passive: true });
+    return () => window.removeEventListener("resize", check);
+  }, []);
+  return isMobile;
+}
+
 function InstagramIcon(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" {...props}>
@@ -297,6 +309,7 @@ function IconBadge({ icon: Icon, color = "sky" }: { icon: React.ElementType; col
   );
 }
 
+// FloatingImage: sem animação no mobile, com animação no desktop
 function FloatingImage({
   src,
   alt,
@@ -310,6 +323,25 @@ function FloatingImage({
   rotate?: string;
   glow?: string;
 }) {
+  const isMobile = useIsMobile();
+
+  if (isMobile) {
+    return (
+      <div className={cn("group relative", className)}>
+        <div className={cn("absolute -inset-6 rounded-[36px] bg-gradient-to-br blur-3xl", glow)} />
+        <div className="absolute inset-0 rounded-[32px] border border-white/10 bg-white/[0.02]" />
+        <div
+          className={cn(
+            "relative overflow-hidden rounded-[30px] border border-sky-300/20 bg-[#081327]/80 p-2 shadow-[0_25px_90px_rgba(2,8,23,0.65)]",
+            rotate
+          )}
+        >
+          <img src={src} alt={alt} className="h-full w-full rounded-[24px] object-cover" />
+        </div>
+      </div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -454,7 +486,17 @@ function TestimonialCard({
   );
 }
 
+// Animated orbs: desktop only
 function AnimatedOrbs() {
+  const isMobile = useIsMobile();
+  if (isMobile) {
+    return (
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute -left-40 -top-40 h-[500px] w-[500px] rounded-full bg-sky-500/6 blur-[120px]" />
+        <div className="absolute -right-40 top-1/3 h-[400px] w-[400px] rounded-full bg-emerald-500/6 blur-[100px]" />
+      </div>
+    );
+  }
   return (
     <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
       <motion.div
@@ -476,7 +518,11 @@ function AnimatedOrbs() {
   );
 }
 
+// Floating particles: desktop only
 function FloatingParticles() {
+  const isMobile = useIsMobile();
+  if (isMobile) return null;
+
   const particles = [
     { x: "7%", y: "18%", size: 3, color: "bg-sky-400/40", duration: 8, delay: 0 },
     { x: "93%", y: "11%", size: 2, color: "bg-emerald-400/50", duration: 10, delay: 1.5 },
@@ -509,7 +555,17 @@ function FloatingParticles() {
   );
 }
 
+// Corner glows: desktop only (static on mobile)
 function CornerGlows() {
+  const isMobile = useIsMobile();
+  if (isMobile) {
+    return (
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+        <div className="absolute -left-32 -top-32 h-80 w-80 rounded-full bg-gradient-to-br from-sky-500/10 to-transparent blur-3xl" />
+        <div className="absolute -bottom-32 -right-32 h-96 w-96 rounded-full bg-gradient-to-tl from-emerald-500/8 to-transparent blur-3xl" />
+      </div>
+    );
+  }
   return (
     <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
       <motion.div
@@ -588,14 +644,17 @@ export default function LandingPage() {
       id="home"
       className="min-h-screen overflow-x-hidden bg-[#050B18] text-slate-50 selection:bg-sky-400/30 selection:text-white"
     >
+      {/* Background layers */}
       <div className="fixed inset-0 -z-20 bg-[radial-gradient(circle_at_top,rgba(14,165,255,0.14),transparent_28%),radial-gradient(circle_at_80%_20%,rgba(56,189,248,0.12),transparent_24%),radial-gradient(circle_at_20%_85%,rgba(34,197,94,0.12),transparent_26%),linear-gradient(180deg,#050B18_0%,#071326_48%,#0B1730_100%)]" />
-      <div className="fixed inset-0 -z-10 opacity-40 [background-image:linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] [background-size:72px_72px] [mask-image:radial-gradient(circle_at_center,black,transparent_80%)]" />
-      <div className="fixed inset-0 -z-10 opacity-60 [background-image:radial-gradient(rgba(255,255,255,0.18)_1px,transparent_1px)] [background-size:28px_28px] [mask-image:radial-gradient(circle_at_center,black,transparent_78%)]" />
+      {/* Grid and dot patterns: hidden on mobile for perf */}
+      <div className="fixed inset-0 -z-10 hidden opacity-40 md:block [background-image:linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] [background-size:72px_72px] [mask-image:radial-gradient(circle_at_center,black,transparent_80%)]" />
+      <div className="fixed inset-0 -z-10 hidden opacity-60 md:block [background-image:radial-gradient(rgba(255,255,255,0.18)_1px,transparent_1px)] [background-size:28px_28px] [mask-image:radial-gradient(circle_at_center,black,transparent_78%)]" />
 
       <AnimatedOrbs />
       <FloatingParticles />
       <CornerGlows />
 
+      {/* ─── HEADER ─── */}
       <header
         className={cn(
           "sticky top-0 z-50 border-b border-white/10 backdrop-blur-2xl transition-all duration-500",
@@ -611,13 +670,15 @@ export default function LandingPage() {
             className="flex items-center gap-3"
           >
             <div className="relative">
+              {/* Glow behind logo: desktop only */}
               <motion.div
                 animate={{ opacity: [0.4, 0.8, 0.4] }}
                 transition={{ duration: 3, repeat: Infinity }}
-                className="absolute -inset-1 rounded-xl bg-gradient-to-br from-sky-400/30 to-emerald-400/20 blur-sm"
+                className="absolute -inset-1 hidden rounded-xl bg-gradient-to-br from-sky-400/30 to-emerald-400/20 blur-sm md:block"
               />
+              {/* LOGO ATUALIZADA: logozapflow360.jpeg */}
               <img
-                src="/logo-zapflow360.png"
+                src="/logozapflow360.jpeg"
                 alt="Logo ZapFlow360"
                 className="relative h-12 w-auto rounded-xl object-contain sm:h-14"
               />
@@ -670,12 +731,7 @@ export default function LandingPage() {
               transition={{ duration: 0.5, delay: 0.4 }}
               className="hidden items-center gap-2 rounded-full border border-emerald-400/25 bg-emerald-400/10 px-5 py-2.5 text-sm font-medium text-emerald-200 transition hover:scale-[1.04] hover:bg-emerald-400/18 hover:border-emerald-400/40 hover:shadow-[0_0_25px_rgba(52,211,153,0.22)] md:inline-flex"
             >
-              <motion.span
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 2, repeat: Infinity, repeatDelay: 2 }}
-              >
-                <MessageCircle className="h-4 w-4" />
-              </motion.span>
+              <MessageCircle className="h-4 w-4" />
               Testar agora
             </motion.a>
 
@@ -762,6 +818,7 @@ export default function LandingPage() {
       </header>
 
       <main>
+        {/* ─── HERO ─── */}
         <section className="relative">
           <div className="mx-auto grid max-w-7xl items-center gap-16 px-4 pb-20 pt-16 sm:px-6 lg:grid-cols-[0.88fr_1.12fr] lg:px-8 lg:pb-28 lg:pt-24">
             <motion.div
@@ -776,12 +833,7 @@ export default function LandingPage() {
                 transition={{ duration: 0.6 }}
                 className="mb-6 inline-flex items-center gap-2 rounded-full border border-sky-400/20 bg-white/5 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.28em] text-sky-200 backdrop-blur-xl"
               >
-                <motion.span
-                  animate={{ rotate: [0, 15, -15, 0] }}
-                  transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
-                >
-                  <Sparkles className="h-3.5 w-3.5 text-emerald-300" />
-                </motion.span>
+                <Sparkles className="h-3.5 w-3.5 text-emerald-300" />
                 Agendamento automatizado no WhatsApp
               </motion.div>
 
@@ -870,12 +922,9 @@ export default function LandingPage() {
                   >
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-sky-400/5 to-emerald-400/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
                     <div className="flex w-full flex-col items-center gap-4 text-center">
-                      <motion.div
-                        whileHover={{ scale: 1.15, rotate: 5 }}
-                        className="shrink-0 rounded-xl bg-emerald-400/10 p-2 text-emerald-300"
-                      >
+                      <div className="shrink-0 rounded-xl bg-emerald-400/10 p-2 text-emerald-300">
                         <Check className="h-4 w-4" />
-                      </motion.div>
+                      </div>
                       <p className="w-full text-center text-sm leading-7 text-slate-200">{item}</p>
                     </div>
                   </GlassCard>
@@ -905,6 +954,7 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* ─── STATS ─── */}
         <section className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             {stats.map((stat, index) => (
@@ -913,6 +963,7 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* ─── FEATURES ─── */}
         <section
           id="funcionalidades"
           className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28"
@@ -946,9 +997,7 @@ export default function LandingPage() {
                     )}
                   >
                     <div className="pointer-events-none absolute inset-0 rounded-[28px] bg-gradient-to-br from-sky-400/5 to-emerald-400/5 opacity-0 transition-opacity duration-500 group-hover:opacity-100" />
-                    <motion.div
-                      whileHover={{ scale: 1.1, rotate: -5 }}
-                      transition={{ type: "spring", stiffness: 300 }}
+                    <div
                       className={cn(
                         "mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl border",
                         item.color === "emerald"
@@ -957,7 +1006,7 @@ export default function LandingPage() {
                       )}
                     >
                       <Icon className="h-5 w-5" />
-                    </motion.div>
+                    </div>
                     <h3 className="text-xl font-semibold text-white">{item.title}</h3>
                     <p className="mt-3 text-sm leading-7 text-slate-300">{item.text}</p>
                   </GlassCard>
@@ -967,6 +1016,7 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* ─── HOW IT WORKS ─── */}
         <section
           id="como-funciona"
           className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28"
@@ -994,13 +1044,9 @@ export default function LandingPage() {
                         <div className="pointer-events-none absolute inset-y-6 right-0 w-px bg-gradient-to-b from-sky-400/0 via-sky-300/80 to-emerald-400/0" />
                       )}
                       <div className="flex gap-4">
-                        <motion.div
-                          whileHover={{ scale: 1.12, rotate: 8 }}
-                          transition={{ type: "spring", stiffness: 300 }}
-                          className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-sky-400/20 bg-slate-900/80 text-sky-300 shadow-[0_0_22px_rgba(56,189,248,0.14)]"
-                        >
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-sky-400/20 bg-slate-900/80 text-sky-300 shadow-[0_0_22px_rgba(56,189,248,0.14)]">
                           <Icon className="h-5 w-5" />
-                        </motion.div>
+                        </div>
                         <div>
                           <div className="mb-2 text-xs font-semibold uppercase tracking-[0.24em] text-emerald-300">
                             Etapa {index + 1}
@@ -1029,6 +1075,7 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* ─── CHAT SECTION ─── */}
         <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-16">
           <div className="grid items-center gap-8 lg:grid-cols-[1.05fr_0.95fr]">
             <div className="relative order-2 lg:order-1">
@@ -1079,6 +1126,7 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* ─── AI SECTION ─── */}
         <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
           <div className="grid items-center gap-8 lg:grid-cols-[0.95fr_1.05fr]">
             <div>
@@ -1144,6 +1192,7 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* ─── BEFORE / AFTER ─── */}
         <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
           <SectionTitle
             eyebrow="Como funciona na prática"
@@ -1225,6 +1274,7 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* ─── TESTIMONIALS ─── */}
         <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
           <SectionTitle
             eyebrow="Depoimentos"
@@ -1238,6 +1288,7 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* ─── PRICING ─── */}
         <section id="planos" className="mx-auto max-w-7xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
           <SectionTitle
             eyebrow="Planos e preços"
@@ -1311,9 +1362,7 @@ export default function LandingPage() {
 
                           <div className="p-7 pt-8">
                             <div className="mb-6">
-                              <motion.div
-                                whileHover={{ scale: 1.1, rotate: -8 }}
-                                transition={{ type: "spring", stiffness: 300 }}
+                              <div
                                 className={cn(
                                   "mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl border",
                                   plan.recommended
@@ -1322,7 +1371,7 @@ export default function LandingPage() {
                                 )}
                               >
                                 <Icon className="h-5 w-5" />
-                              </motion.div>
+                              </div>
                               <h4 className="text-2xl font-semibold text-white">{plan.name}</h4>
                               <p
                                 className={cn(
@@ -1439,6 +1488,7 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* ─── FAQ ─── */}
         <section id="faq" className="mx-auto max-w-5xl px-4 py-20 sm:px-6 lg:px-8 lg:py-28">
           <SectionTitle
             eyebrow="FAQ"
@@ -1452,6 +1502,7 @@ export default function LandingPage() {
           </div>
         </section>
 
+        {/* ─── CTA ─── */}
         <section className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8 lg:pb-28">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -1506,13 +1557,15 @@ export default function LandingPage() {
         </section>
       </main>
 
+      {/* ─── FOOTER ─── */}
       <footer className="border-t border-white/10 bg-[#050B18]/80 backdrop-blur-xl">
         <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
           <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr_0.8fr_1fr]">
             <div>
               <div className="flex items-center gap-3">
+                {/* LOGO ATUALIZADA no footer */}
                 <img
-                  src="/logo-zapflow360.png"
+                  src="/logozapflow360.jpeg"
                   alt="Logo ZapFlow360"
                   className="h-12 w-auto rounded-xl object-contain"
                 />
@@ -1636,10 +1689,12 @@ export default function LandingPage() {
                 © 2026 ZapFlow360. Todos os direitos reservados.
               </p>
               <div className="flex items-center gap-2">
+                {/* Status dot: static on mobile, pulsing on desktop */}
+                <div className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] md:hidden" />
                 <motion.div
                   animate={{ opacity: [0.5, 1, 0.5] }}
                   transition={{ duration: 2, repeat: Infinity }}
-                  className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)]"
+                  className="hidden h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.6)] md:block"
                 />
                 <p className="text-xs text-slate-500">Sistema operacional · 24/7</p>
               </div>
@@ -1648,6 +1703,7 @@ export default function LandingPage() {
         </div>
       </footer>
 
+      {/* ─── BACK TO TOP ─── */}
       <a
         href="#home"
         aria-label="Voltar ao topo"
@@ -1656,6 +1712,7 @@ export default function LandingPage() {
         <ChevronsUp className="h-6 w-6" />
       </a>
 
+      {/* ─── WHATSAPP FAB ─── */}
       <a
         href={WHATSAPP_LINK}
         target="_blank"
@@ -1663,11 +1720,14 @@ export default function LandingPage() {
         aria-label="Falar no WhatsApp"
         className="group fixed bottom-5 right-5 z-50"
       >
+        {/* Glow: desktop only */}
         <motion.div
           animate={{ scale: [1, 1.06, 1] }}
           transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
-          className="absolute -inset-1 rounded-full bg-gradient-to-br from-emerald-400/50 to-sky-400/30 blur-md opacity-70 transition-opacity duration-300 group-hover:opacity-100"
+          className="absolute -inset-1 hidden rounded-full bg-gradient-to-br from-emerald-400/50 to-sky-400/30 blur-md opacity-70 transition-opacity duration-300 group-hover:opacity-100 md:block"
         />
+        {/* Static glow on mobile */}
+        <div className="absolute -inset-1 rounded-full bg-gradient-to-br from-emerald-400/30 to-sky-400/20 blur-md opacity-60 md:hidden" />
         <div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-emerald-300/30 shadow-[0_20px_60px_rgba(52,211,153,0.32)] transition-all duration-300 group-hover:scale-110 group-hover:shadow-[0_25px_70px_rgba(52,211,153,0.5)]">
           <img src="/whatsapp.png" alt="WhatsApp" className="h-full w-full object-cover" />
         </div>
