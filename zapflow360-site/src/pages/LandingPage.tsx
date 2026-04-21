@@ -309,7 +309,7 @@ function IconBadge({ icon: Icon, color = "sky" }: { icon: React.ElementType; col
   );
 }
 
-// FloatingImage: sem animação no mobile, com animação no desktop
+// FloatingImage: oculta no mobile, com animação no desktop
 function FloatingImage({
   src,
   alt,
@@ -325,22 +325,7 @@ function FloatingImage({
 }) {
   const isMobile = useIsMobile();
 
-  if (isMobile) {
-    return (
-      <div className={cn("group relative", className)}>
-        <div className={cn("absolute -inset-6 rounded-[36px] bg-gradient-to-br blur-3xl", glow)} />
-        <div className="absolute inset-0 rounded-[32px] border border-white/10 bg-white/[0.02]" />
-        <div
-          className={cn(
-            "relative overflow-hidden rounded-[30px] border border-sky-300/20 bg-[#081327]/80 p-2 shadow-[0_25px_90px_rgba(2,8,23,0.65)]",
-            rotate
-          )}
-        >
-          <img src={src} alt={alt} className="h-full w-full rounded-[24px] object-cover" />
-        </div>
-      </div>
-    );
-  }
+  if (isMobile) return null;
 
   return (
     <motion.div
